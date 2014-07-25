@@ -1,0 +1,12 @@
+.setting
+.project
+.classpath
+/.idea
+/target
+/br_pmd_rule.xml
+/codec.git.zip
+/ttis_rules.xml
+/.settings
+/.pmd
+*.log
+git.properties
