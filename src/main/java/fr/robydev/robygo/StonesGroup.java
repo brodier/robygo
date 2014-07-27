@@ -16,10 +16,10 @@ public class StonesGroup {
         stonesPos.add(pos);
         blackColor = isBlack;
         for(Integer lib: libs){
-            if(!lib.equals(Board.EMPTY)) liberties.add(lib);
+            if(!lib.equals(Board.UNDEF)) liberties.add(lib);
         }
     }
-
+    public ArrayList<Integer> getStones(){ return stonesPos; }
     public boolean isOpponent(boolean isBlack){
         return (isBlack != blackColor);
     }
@@ -39,9 +39,9 @@ public class StonesGroup {
         liberties.remove(new Integer(pos));
     }
 
-    public void addStone(int pos){
+    public void addStone(Integer pos){
         stonesPos.add(pos);
-        liberties.remove(new Integer(pos));
+        liberties.remove(pos);
     }
 
     public void addLiberty(Integer lib){
@@ -50,7 +50,14 @@ public class StonesGroup {
         }
     }
 
-    public void joinWith(StonesGroup other, Integer pos){
-
+    public void joinWith(StonesGroup other, StonesGroup[] pos){
+        for(int stone: other.stonesPos){
+            pos[stone]=this;
+        }
+        for(Integer lib:other.liberties){
+            if(pos[lib] == Board.EMPTY && !liberties.contains(lib)){
+                liberties.add(lib);
+            }
+        }
     }
 }

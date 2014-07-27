@@ -7,11 +7,12 @@ import java.util.ArrayList;
  */
 public class Board {
     public static final int DEFAULT_SIZE=19;
-    public static final int EMPTY=-1;
-    public static final int KO=-2;
-    private int[] position = new int[DEFAULT_SIZE * DEFAULT_SIZE];
-    private int koPos = EMPTY;
-    private ArrayList<StonesGroup> groups = new ArrayList<StonesGroup>();
+    // Empty position are represented by a StonesGroup reference set to null
+    public static final StonesGroup EMPTY=null;
+    // Undefined Position
+    public static final int UNDEF=-1;
+    private StonesGroup[] position = new StonesGroup[DEFAULT_SIZE * DEFAULT_SIZE];
+    private int koPos = UNDEF;
     private final int[][] ngbPositions = initNgbPos();
     private boolean blackTurn = true;
     private int size = DEFAULT_SIZE;
@@ -19,24 +20,16 @@ public class Board {
     private static int[][] initNgbPos(){
         int sz = DEFAULT_SIZE;
         int[][] ngbPos = new int[sz*sz][];
-        int tmpNgb[] = new int[4];
+        int [] tmpNgb = new int[4];
         int nbNgb;
         for(int x = 0; x < sz; x++) {
             for(int y= 0; y < sz; y++) {
                 int curPos = x + (y * sz);
                  nbNgb = 0;
-                if(x != 0) { nbNgb++;
-                    tmpNgb[nbNgb] = curPos - 1 ;
-                }
-                if(y != 0) { nbNgb++;
-                    tmpNgb[nbNgb] = curPos - sz ;
-                }
-                if(x+1 != sz) { nbNgb++;
-                    tmpNgb[nbNgb] = curPos + 1 ;
-                }
-                if(y+1 != sz) { nbNgb++;
-                    tmpNgb[nbNgb] = curPos + sz ;
-                }
+                if(x != 0) { tmpNgb[nbNgb++] = curPos - 1 ; }
+                if(y != 0) { tmpNgb[nbNgb++] = curPos - sz ; }
+                if(x+1 != sz) { tmpNgb[nbNgb++] = curPos + 1 ; }
+                if(y+1 != sz) { tmpNgb[nbNgb++] = curPos + sz ; }
 
                 ngbPos[curPos] = new int[nbNgb];
                 for(int i = 0; i < nbNgb; i++) {
@@ -56,7 +49,7 @@ public class Board {
     public boolean move(int pos){
         ArrayList<StonesGroup> groupsToCapture = null;
         ArrayList<StonesGroup> groupToJoin = null;
-        int [] libs = new int[]{EMPTY,EMPTY,EMPTY,EMPTY};
+        int [] libs = new int[]{UNDEF,UNDEF,UNDEF,UNDEF};
         int nbLibs = 0;
         boolean newGroup = true;
         StonesGroup firstGroup = null;
@@ -65,11 +58,11 @@ public class Board {
         }
         int[] ngbs = ngbPositions[pos];
         for(int ngb: ngbs){
-            if(position[ngb] == EMPTY){
-                libs[nbLibs++] = position[ngb];
+            StonesGroup g = position[ngb];
+            if(g == EMPTY){
+                libs[nbLibs++] = ngb;
                 continue;
             } else {
-               StonesGroup g = groups.get(ngb);
                if(g.isOpponent(blackTurn)){
                    if(g.isInAtari()){
                        if(groupsToCapture == null){ groupsToCapture = new ArrayList<StonesGroup>(); }
@@ -83,39 +76,50 @@ public class Board {
                        newGroup = false;
                        g.addStone(pos);
                    } else {
-                       firstGroup.joinWith(g,pos);
+                       firstGroup.addStone(pos);
+                       firstGroup.joinWith(g,position);
                    }
                }
             }
-            if(newGroup){
-                StonesGroup g = new StonesGroup(pos, blackTurn, libs);
-                groups.add(g);
-                position[pos] = groups.size() - 1;
-            } else {
-
-            }
         }
 
-
+        if(newGroup){
+            firstGroup = new StonesGroup(pos, blackTurn, libs);
+        }
+        if(groupsToCapture != null){
+            for(StonesGroup gtr: groupsToCapture){
+                removeGroup(gtr);
+            }
+        }
+        position[pos] = firstGroup;
+        blackTurn = !blackTurn;
         return true;
     }
 
+    private void removeGroup(StonesGroup gpToRemove){
+        for(int i: gpToRemove.getStones()){
+            position[i] = EMPTY;
+            for(int ngb: ngbPositions[i]){
+                if(position[ngb] != EMPTY && position[ngb].isSameColor(blackTurn)){
+                    position[ngb].addLiberty(i);
+                }
+            }
+        }
+    }
+
     public boolean isValid(int pos){
-        if(position[pos] != EMPTY){
+        if(pos == koPos || position[pos] != EMPTY){
             return false;
         }
         int [] ngbs = ngbPositions[pos];
         for(int ngb: ngbs) {
             if (position[ngb] == EMPTY) {
                 return true;
-            } else if (position[ngb] == KO) {
-                return false;
             }
         }
         // All neighbors are occupied by stones check if capture or connect to a group that is not in atari
         for(int ngb: ngbs) {
-            int ngbPos = position[ngb];
-            StonesGroup g = groups.get(ngbPos);
+            StonesGroup g = position[ngb];
             if(g.isOpponent(blackTurn) && g.isInAtari()){
                 return true;
             } else if(!g.isSameColor(blackTurn) && !g.isInAtari()){
@@ -124,6 +128,39 @@ public class Board {
         }
         // Suicide move
         return false;
+    }
+
+    public String toString(){
+        StringBuffer buff = new StringBuffer();
+        for(int i = 0; i < size; i++){
+            for(int j = 0; j < size; j++){
+                StonesGroup posStatus =position[j+i*size];
+                if(posStatus == EMPTY){
+                    buff.append(".");
+                } else if(posStatus.isSameColor(true)){
+                    buff.append("X");
+                } else {
+                    buff.append("O");
+                }
+            }
+            buff.append("\n");
+        }
+        return buff.toString();
+    }
+
+    public static int computePos(int x, int y){ return (x-1) + 19 * (y-1);}
+    public static void main (String [] arg){
+        Board b = new Board();
+        b.move(computePos(4,4));
+        b.move(computePos(5,4));
+        b.move(computePos(3,5));
+        b.move(computePos(6,5));
+        b.move(computePos(4,6));
+        b.move(computePos(5,6));
+        b.move(computePos(5,5));
+        System.out.println(b.toString());
+        b.move(computePos(4,5));
+        System.out.println(b.toString());
     }
 
 }
