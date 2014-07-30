@@ -16,7 +16,9 @@ public class Board {
     private int[][] ngbPositions = initNgbPos(DEFAULT_SIZE);
     private boolean blackTurn = true;
     private int size = DEFAULT_SIZE;
-
+    public void setBlackTurn(boolean black){
+        blackTurn = black;
+    }
     private static int[][] initNgbPos(int sz){
         int[][] ngbPos = new int[sz*sz][];
         int [] tmpNgb = new int[4];

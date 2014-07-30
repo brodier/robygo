@@ -69,6 +69,9 @@ public class Engine extends Thread {
         else if(command.equals("version"))
             result.append("0.0.1");
         else if(command.equals("genmove")){
+            String [] args = cmdLine[1].split(" ");
+            board.setBlackTurn(args[0].equals("b") || args[0].equals("B"));
+
             ArrayList<Integer> validMove = new ArrayList<Integer>();
             int nbBoardPos = board.getSize() * board.getSize();
             for(int i = 0; i < nbBoardPos; i++){
@@ -104,7 +107,9 @@ public class Engine extends Thread {
         } else if(command.equals("komi")){
             komi = Float.parseFloat(cmdLine[1]);
         } else if(command.equals("play")){
-            board.move(computePos(cmdLine[1].split(" ")[1], board.getSize()));
+            String [] args = cmdLine[1].split(" ");
+            board.setBlackTurn(args[0].equals("b") || args[0].equals("B"));
+            board.move(computePos(args[1], board.getSize()));
         }
 
       if (error){
