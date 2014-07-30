@@ -69,8 +69,19 @@ public class Engine extends Thread {
         else if(command.equals("version"))
             result.append("0.0.1");
         else if(command.equals("genmove")){
-            int pos = Math.abs(randEngine.nextInt()) % (board.getSize() * board.getSize());
-            result.append(computeCoordinate(pos,board.getSize()));
+            ArrayList<Integer> validMove = new ArrayList<Integer>();
+            int nbBoardPos = board.getSize() * board.getSize();
+            for(int i = 0; i < nbBoardPos; i++){
+                if(board.isValid(i))
+                    validMove.add(i);
+            }
+            if(validMove.size() == 0)
+                result.append("pass");
+            else {
+                int pos = validMove.get(randEngine.nextInt(validMove.size()));
+                board.move(pos);
+                result.append(computeCoordinate(pos, board.getSize()));
+            }
         } else if(command.equals("list_commands")){
            for(String knownCommand: cmdsList){
                result.append(knownCommand + "\n");
