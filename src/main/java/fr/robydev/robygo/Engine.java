@@ -3,6 +3,8 @@ package fr.robydev.robygo;
 import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Random;
 import java.util.Scanner;
 
 /**
@@ -10,7 +12,7 @@ import java.util.Scanner;
  */
 public class Engine extends Thread {
     protected static final Logger logger = Logger.getLogger(Engine.class.getName());
-
+    private Random randEngine = new Random();
     private Scanner controller;
     private Board board;
     private ArrayList<Integer> movesHistory;
@@ -67,7 +69,8 @@ public class Engine extends Thread {
         else if(command.equals("version"))
             result.append("0.0.1");
         else if(command.equals("genmove")){
-            result.append(" d4");
+            int pos = Math.abs(randEngine.nextInt()) % (board.getSize() * board.getSize());
+            result.append(computeCoordinate(pos,board.getSize()));
         } else if(command.equals("list_commands")){
            for(String knownCommand: cmdsList){
                result.append(knownCommand + "\n");
@@ -83,6 +86,14 @@ public class Engine extends Thread {
         } else if(!cmdList.contains(command)){
             error = true;
             result.append("unknown command # " + command);
+        } else if(command.equals("boardsize")){
+            board = new Board(Integer.parseInt(cmdLine[1]));
+        } else if(command.equals("clear_board")){
+            board = new Board(board.getSize());
+        } else if(command.equals("komi")){
+            komi = Float.parseFloat(cmdLine[1]);
+        } else if(command.equals("play")){
+            board.move(computePos(cmdLine[1].split(" ")[1], board.getSize()));
         }
 
       if (error){
@@ -94,16 +105,33 @@ public class Engine extends Thread {
           result.insert(1,Integer.toString(id));
       }
 
-      result.append("\n\n");
       return result.toString();
 
+    }
+
+
+    private static Character[] colsName = {'A','B','C','D','E','F','G','H','J',
+        'K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'};
+
+    public static String computeCoordinate(int pos, int bdSize) {
+        int col = pos % bdSize;
+        int row = (pos - col) / bdSize;
+
+        return Character.toString(colsName[col]) + Integer.toString(row + 1);
+    }
+
+    public static int computePos(String s, int bdSize) {
+        return Arrays.asList(colsName).indexOf(s.charAt(0)) +
+                (Integer.parseInt(s.substring(1)) - 1) * bdSize ;
     }
 
     public void run(){
         while(true){
             String cmd = controller.nextLine();
-            System.err.println("Recieve commande : " + cmd);
-            System.out.println(handleCmd(cmd));
+            logger.info("Recieve commande : " + cmd);
+            String reply = handleCmd(cmd);
+            logger.info("Reply with : " + reply);
+            System.out.println(reply + "\n\n");
         }
      }
 
