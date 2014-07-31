@@ -36,6 +36,7 @@ public class Engine extends Thread {
 
     public Engine(Scanner s){
         controller = s;
+        board = new Board(19);
     }
 
     public String protocol_version(){
@@ -147,6 +148,7 @@ public class Engine extends Thread {
             logger.info("Recieve commande : " + cmd);
             String reply = handleCmd(cmd);
             logger.info("Reply with : " + reply);
+            logger.info(board.toString());
             System.out.println(reply + "\n\n");
         }
      }

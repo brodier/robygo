@@ -133,19 +133,22 @@ public class Board {
 
     public String toString(){
         StringBuffer buff = new StringBuffer();
-        for(int i = 0; i < size; i++){
+        buff.append("\n    A B C D E F G H J K L M N O P Q R S T   \n");
+        for(int i = size - 1; i > -1; i--){
+            buff.append("   ");
             for(int j = 0; j < size; j++){
                 StonesGroup posStatus =position[j+i*size];
                 if(posStatus == EMPTY){
-                    buff.append(".");
+                    buff.append(" .");
                 } else if(posStatus.isSameColor(true)){
-                    buff.append("X");
+                    buff.append(" X");
                 } else {
-                    buff.append("O");
+                    buff.append(" O");
                 }
             }
             buff.append("\n");
         }
+        buff.append("\n    A B C D E F G H J K L M N O P Q R S T \n");
         return buff.toString();
     }
     public int getSize(){
