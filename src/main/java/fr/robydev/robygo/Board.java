@@ -16,6 +16,8 @@ public class Board {
     private int[][] ngbPositions = initNgbPos(DEFAULT_SIZE);
     private boolean blackTurn = true;
     private int size = DEFAULT_SIZE;
+
+    public StonesGroup[] getPosition(){ return position; }
     public void setBlackTurn(boolean black){
         blackTurn = black;
     }

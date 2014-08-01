@@ -50,6 +50,9 @@ public class StonesGroup {
         }
     }
 
+    public int countLiberties(){ return liberties.size(); }
+    public int countStones(){ return stonesPos.size(); }
+
     public void joinWith(StonesGroup other, StonesGroup[] pos){
         for(int stone: other.stonesPos){
             pos[stone]=this;

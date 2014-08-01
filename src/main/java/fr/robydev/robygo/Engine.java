@@ -2,6 +2,9 @@ package fr.robydev.robygo;
 
 import org.apache.log4j.Logger;
 
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.channels.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
@@ -13,8 +16,8 @@ import java.util.Scanner;
 public class Engine extends Thread {
     protected static final Logger logger = Logger.getLogger(Engine.class.getName());
     private Random randEngine = new Random();
-    private Scanner controller;
-    private Board board;
+    private Controller controller;
+    private Board board = new Board(19);
     private ArrayList<Integer> movesHistory;
     private int capturedWhites;
     private int capturedBlacks;
@@ -34,11 +37,7 @@ public class Engine extends Thread {
             "play",
             "genmove"};
 
-    public Engine(Scanner s){
-        controller = s;
-        board = new Board(19);
-    }
-
+    public StonesGroup[] getPosition(){ return board.getPosition(); }
     public String protocol_version(){
         return "2";
     }
@@ -149,12 +148,18 @@ public class Engine extends Thread {
             String reply = handleCmd(cmd);
             logger.info("Reply with : " + reply);
             logger.info(board.toString());
-            System.out.println(reply + "\n\n");
+            controller.write(reply + "\n\n");
         }
      }
 
+    public Engine(ReadableByteChannel iChannel, WritableByteChannel oChannel){
+        controller = new Controller(iChannel,oChannel);
+    }
+
     public static void main(String[] args){
         Engine e = new Engine(new Scanner(System.in));
+        ReadableByteChannel requestChannel = Channels.newChannel(System.in);
+        WritableByteChannel replyChannel = Channels.newChannel(System.out);
         logger.info("Starting RobyGo Engine");
 
         try {
