@@ -51,8 +51,11 @@ public class StonesGroup {
     }
 
     public void joinWith(StonesGroup other, StonesGroup[] pos){
+        if(this == other)
+            return;
         for(int stone: other.stonesPos){
             pos[stone]=this;
+            stonesPos.add(stone);
         }
         for(Integer lib:other.liberties){
             if(pos[lib] == Board.EMPTY && !liberties.contains(lib)){

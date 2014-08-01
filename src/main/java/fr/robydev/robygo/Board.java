@@ -11,7 +11,7 @@ public class Board {
     public static final StonesGroup EMPTY=null;
     // Undefined Position
     public static final int UNDEF=-1;
-    private StonesGroup[] position = new StonesGroup[DEFAULT_SIZE * DEFAULT_SIZE];
+    public StonesGroup[] position = new StonesGroup[DEFAULT_SIZE * DEFAULT_SIZE];
     private int koPos = UNDEF;
     private int[][] ngbPositions = initNgbPos(DEFAULT_SIZE);
     private boolean blackTurn = true;
@@ -47,6 +47,11 @@ public class Board {
         size = 19;
     }
 
+    public boolean play(boolean blackMove, int pos){
+        blackTurn = blackMove;
+        return move(pos);
+    }
+
     public boolean move(int pos){
         ArrayList<StonesGroup> groupsToCapture = null;
         ArrayList<StonesGroup> groupToJoin = null;
@@ -68,6 +73,7 @@ public class Board {
                    if(g.isInAtari()){
                        if(groupsToCapture == null){ groupsToCapture = new ArrayList<StonesGroup>(); }
                        groupsToCapture.add(g);
+                       libs[nbLibs++] = ngb;
                    } else {
                      g.removeLiberty(pos);
                    }
@@ -76,8 +82,8 @@ public class Board {
                        firstGroup = g;
                        newGroup = false;
                        g.addStone(pos);
+                       position[pos] = firstGroup;
                    } else {
-                       firstGroup.addStone(pos);
                        firstGroup.joinWith(g,position);
                    }
                }
@@ -85,14 +91,15 @@ public class Board {
         }
 
         if(newGroup){
-            firstGroup = new StonesGroup(pos, blackTurn, libs);
+            position[pos] = new StonesGroup(pos, blackTurn, libs);
+        } else {
+          for(int lib: libs){ if(lib!=UNDEF){ position[pos].addLiberty(lib); } }
         }
         if(groupsToCapture != null){
             for(StonesGroup gtr: groupsToCapture){
                 removeGroup(gtr);
             }
         }
-        position[pos] = firstGroup;
         blackTurn = !blackTurn;
         return true;
     }
@@ -123,7 +130,7 @@ public class Board {
             StonesGroup g = position[ngb];
             if(g.isOpponent(blackTurn) && g.isInAtari()){
                 return true;
-            } else if(!g.isSameColor(blackTurn) && !g.isInAtari()){
+            } else if(g.isSameColor(blackTurn) && !g.isInAtari()){
                 return true;
             }
         }
