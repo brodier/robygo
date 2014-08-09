@@ -42,6 +42,20 @@ public class Board {
         return ngbPos;
     }
 
+    public boolean isEye(int pos){
+        StonesGroup g = EMPTY;
+        for(int ngb: ngbPositions[pos]){
+            if(g == EMPTY){
+                g = position[ngb];
+                if(g == EMPTY)
+                    return false;
+            }
+            if(g != position[ngb])
+                return false;
+        }
+        return true;
+    }
+
     public Board(int sz){ size = sz; initNgbPos(size); }
     public Board(){
         size = 19;
@@ -69,13 +83,15 @@ public class Board {
                 libs[nbLibs++] = ngb;
                 continue;
             } else {
+
                if(g.isOpponent(blackTurn)){
-                   if(g.isInAtari()){
-                       if(groupsToCapture == null){ groupsToCapture = new ArrayList<StonesGroup>(); }
-                       groupsToCapture.add(g);
+                   g.removeLiberty(pos);
+                   if(g.hasNoLiberty()){
                        libs[nbLibs++] = ngb;
-                   } else {
-                     g.removeLiberty(pos);
+                       if(groupsToCapture == null){ groupsToCapture = new ArrayList<StonesGroup>(); }
+                       if(!groupsToCapture.contains(g)){
+                           groupsToCapture.add(g);
+                       }
                    }
                } else {
                    if(newGroup){

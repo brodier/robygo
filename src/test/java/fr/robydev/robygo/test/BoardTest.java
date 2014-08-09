@@ -30,6 +30,21 @@ public class BoardTest {
     }
 
     @Test
+    public void testPlay2() throws Exception {
+        Board b = new Board(19);
+        b.play(true,Engine.computePos("B4",19));
+        b.play(true,Engine.computePos("B5",19));
+        b.play(true,Engine.computePos("C4",19));
+        b.play(false,Engine.computePos("A4",19));
+        b.play(false,Engine.computePos("A5",19));
+        b.play(false,Engine.computePos("B6",19));
+        b.play(false,Engine.computePos("B3",19));
+        b.play(false,Engine.computePos("C3",19));
+        b.play(false,Engine.computePos("C5",19));
+        assertTrue(true);
+    }
+
+    @Test
     public void testRePlay() throws Exception {
         Board b = new Board(19);
         b.play("B".equals("B"),Engine.computePos("O11",19));

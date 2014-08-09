@@ -28,8 +28,16 @@ public class StonesGroup {
         return (isBlack == blackColor);
     }
 
+
     public boolean isInAtari(){
         if (liberties.size() == 1) {
+            return true;
+        }
+        else return false;
+    }
+
+    public boolean hasNoLiberty(){
+        if (liberties.size() == 0) {
             return true;
         }
         else return false;

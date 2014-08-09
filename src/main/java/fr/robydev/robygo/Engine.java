@@ -76,7 +76,7 @@ public class Engine extends Thread {
             ArrayList<Integer> validMove = new ArrayList<Integer>();
             int nbBoardPos = board.getSize() * board.getSize();
             for(int i = 0; i < nbBoardPos; i++){
-                if(board.isValid(i))
+                if(board.isValid(i) && !board.isEye(i))
                     validMove.add(i);
             }
             if(validMove.size() == 0)
